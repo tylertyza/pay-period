@@ -82,10 +82,11 @@ function hideModal(modalId) {
 }
 
 // Show a confirmation dialog
-function showConfirmation(title, message, onConfirm) {
+function showConfirmation(title, message, onConfirm, confirmButtonText = 'Confirm') {
   const titleElement = document.getElementById('confirmation-title');
   const messageElement = document.getElementById('confirmation-message');
   const confirmButton = document.getElementById('confirm-action');
+  const cancelButton = document.getElementById('cancel-confirmation');
   
   if (titleElement) titleElement.textContent = title;
   if (messageElement) messageElement.textContent = message;
@@ -94,12 +95,24 @@ function showConfirmation(title, message, onConfirm) {
   const newConfirmButton = confirmButton.cloneNode(true);
   confirmButton.parentNode.replaceChild(newConfirmButton, confirmButton);
   
-  // Add new event listener
+  // Set the button text
+  newConfirmButton.textContent = confirmButtonText;
+  
+  // Clone and replace cancel button to remove any previous event listeners
+  const newCancelButton = cancelButton.cloneNode(true);
+  cancelButton.parentNode.replaceChild(newCancelButton, cancelButton);
+  
+  // Add new event listener for confirm button
   newConfirmButton.addEventListener('click', () => {
     hideModal('confirmation-modal');
     if (typeof onConfirm === 'function') {
       onConfirm();
     }
+  });
+  
+  // Add event listener for cancel button
+  newCancelButton.addEventListener('click', () => {
+    hideModal('confirmation-modal');
   });
   
   // Show the modal
@@ -112,6 +125,19 @@ function showError(message, elementId = 'auth-error') {
   if (errorElement) {
     errorElement.textContent = message;
     errorElement.classList.remove('hidden');
+    errorElement.classList.add('text-red-500');
+    errorElement.classList.remove('text-green-500');
+  }
+}
+
+// Show a success message
+function showSuccess(message, elementId = 'auth-error') {
+  const messageElement = document.getElementById(elementId);
+  if (messageElement) {
+    messageElement.textContent = message;
+    messageElement.classList.remove('hidden');
+    messageElement.classList.add('text-green-500');
+    messageElement.classList.remove('text-red-500');
   }
 }
 

@@ -2,14 +2,28 @@
 
 // Initialize the application
 async function initApp() {
-  // Initialize authentication
-  await initAuth();
-  
-  // Set up tab navigation
-  setupTabs();
-  
-  // Set up dark mode toggle
-  setupDarkMode();
+  console.log('Initializing app...');
+  try {
+    // Initialize authentication
+    await initAuth();
+    
+    // Set up tab navigation
+    setupTabs();
+    
+    // Set up dark mode toggle
+    setupDarkMode();
+    
+    // Initialize notifications if the user is logged in
+    const currentUser = getCurrentUser();
+    if (currentUser && typeof loadNotifications === 'function') {
+      console.log('Initializing notifications for logged in user');
+      loadNotifications();
+    }
+    
+    console.log('App initialization complete');
+  } catch (error) {
+    console.error('Error initializing app:', error);
+  }
 }
 
 // Set up tab navigation
@@ -20,6 +34,14 @@ function setupTabs() {
     button.addEventListener('click', () => {
       const tabName = button.getAttribute('data-tab');
       showTab(tabName);
+      
+      // Load data based on the tab
+      if (tabName === 'suggestions') {
+        // Load notifications when the suggestions tab is clicked
+        if (typeof loadNotifications === 'function') {
+          loadNotifications();
+        }
+      }
     });
   });
 }
@@ -67,5 +89,5 @@ function toggleDarkMode() {
   }
 }
 
-// Initialize the app when the DOM is loaded
-document.addEventListener('DOMContentLoaded', initApp); 
+// This is now handled in index.html after Supabase initialization
+// document.addEventListener('DOMContentLoaded', initApp); 

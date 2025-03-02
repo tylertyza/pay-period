@@ -40,6 +40,7 @@ CREATE TABLE public.expenses (
   normalised_amount DECIMAL(12, 2) NOT NULL,
   account_id UUID REFERENCES public.accounts(id),
   category_id UUID REFERENCES public.categories(id),
+  created_by_id UUID REFERENCES public.users(id),
   import_source TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -51,6 +52,19 @@ CREATE TABLE public.expense_splits (
   expense_id UUID REFERENCES public.expenses(id) ON DELETE CASCADE,
   user_id UUID REFERENCES public.users(id),
   ratio DECIMAL(5, 4) NOT NULL DEFAULT 0.5,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create split_suggestions table
+CREATE TABLE public.split_suggestions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  expense_id UUID REFERENCES public.expenses(id) ON DELETE CASCADE,
+  from_user_id UUID REFERENCES public.users(id),
+  to_user_id UUID REFERENCES public.users(id),
+  suggested_ratio DECIMAL(5, 4) NOT NULL,
+  suggested_amount DECIMAL(12, 2),
+  status TEXT NOT NULL DEFAULT 'pending', -- pending, accepted, rejected
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -74,6 +88,7 @@ ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.expenses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.expense_splits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.income ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.split_suggestions ENABLE ROW LEVEL SECURITY;
 
 -- Drop the restrictive policy
 DROP POLICY IF EXISTS "Users can view own data" ON public.users;
@@ -103,6 +118,19 @@ CREATE POLICY "Users can view expenses for their accounts" ON public.expenses
 -- Expense splits policy - users can see their own expense splits
 CREATE POLICY "Users can view own expense splits" ON public.expense_splits
   FOR SELECT USING (auth.uid() = user_id);
+
+-- Split suggestions policies
+CREATE POLICY "Users can view split suggestions they sent or received" ON public.split_suggestions
+  FOR SELECT USING (auth.uid() = from_user_id OR auth.uid() = to_user_id);
+
+CREATE POLICY "Users can insert split suggestions they create" ON public.split_suggestions
+  FOR INSERT WITH CHECK (auth.uid() = from_user_id);
+
+CREATE POLICY "Users can update split suggestions they received" ON public.split_suggestions
+  FOR UPDATE USING (auth.uid() = to_user_id);
+
+CREATE POLICY "Users can delete split suggestions they created" ON public.split_suggestions
+  FOR DELETE USING (auth.uid() = from_user_id);
 
 -- Income policy - users can see their own income
 CREATE POLICY "Users can view own income" ON public.income

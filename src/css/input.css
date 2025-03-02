@@ -28,7 +28,18 @@
   .dark .text-red-500,
   .dark .accent-element,
   .dark .tab-button.active,
-  .dark .btn-insert {
+  .dark .btn-insert,
+  .dark .split-avatar-current,
+  .dark .split-avatar-other,
+  .dark .split-name-current,
+  .dark .split-name-other,
+  .dark .split-bar-segment,
+  .dark .split-legend-current,
+  .dark .split-legend-other,
+  .dark .split-legend-dot,
+  .dark .sort-indicator,
+  .dark .text-blue-600,
+  .dark .text-blue-400 {
     --tw-text-opacity: 1 !important;
     color: inherit !important;
   }

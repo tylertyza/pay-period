@@ -36,6 +36,7 @@ CREATE TABLE public.expenses (
   normalised_amount DECIMAL(12, 2) NOT NULL,
   account_id UUID REFERENCES public.accounts(id),
   category_id UUID REFERENCES public.categories(id),
+  created_by_id UUID REFERENCES public.users(id),
   import_source TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

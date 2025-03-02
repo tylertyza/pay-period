@@ -287,13 +287,54 @@ async function findUserByEmail(email) {
   }
 }
 
-// Add user to shared users
-async function addUserByEmail(email) {
+// Find user by ID
+async function findUserById(userId) {
+  console.log('Searching for user with ID:', userId);
+  
+  if (!userId) {
+    console.error('Invalid user ID:', userId);
+    return null;
+  }
+  
+  try {
+    // Try to find the user by ID
+    const { data, error } = await window.supabase
+      .from('users')
+      .select('id, name, email')
+      .eq('id', userId)
+      .limit(1);
+    
+    console.log('User search results:', data, 'Error:', error);
+    
+    if (data && data.length > 0) {
+      console.log('User found:', data[0]);
+      return data[0];
+    }
+    
+    // If no user found, check if it's in shared users
+    const sharedUser = sharedUsers.find(user => user.id === userId);
+    if (sharedUser) {
+      return sharedUser;
+    }
+    
+    console.log('No user found with ID:', userId);
+    return null;
+  } catch (e) {
+    console.error('Exception during user search by ID:', e);
+    return null;
+  }
+}
+
+// Add user by email
+async function addUserByEmail() {
+  const inviteEmailInput = document.getElementById('invite-email');
+  const email = inviteEmailInput?.value;
+  
   console.log('Adding user by email:', email);
   
   // Check if email is valid
   if (!email || !email.includes('@')) {
-    alert('Please enter a valid email address.');
+    console.error('Please enter a valid email address.');
     return;
   }
   
@@ -306,13 +347,12 @@ async function addUserByEmail(email) {
   );
   
   if (existingUser) {
-    alert('This user is already shared on this account.');
+    console.error('This user is already shared on this account.');
     return;
   }
   
   // Show loading state
   const addUserButton = document.getElementById('add-user-button');
-  const inviteEmailInput = document.getElementById('invite-email');
   
   if (addUserButton) {
     addUserButton.disabled = true;
@@ -334,14 +374,14 @@ async function addUserByEmail(email) {
       // This is a special case for testing/demo purposes
       const currentUser = getCurrentUser();
       if (currentUser && currentUser.email === normalizedEmail) {
-        alert("You can't add yourself as a shared user because you're already the owner.");
+        console.error("You can't add yourself as a shared user because you're already the owner.");
         return;
       }
       
       // User not found, offer to send invitation
       if (confirm(`No user found with email ${email}. This user needs to create an account before they can be added. Would you like to send them an invitation?`)) {
         // In a real app, you would send an invitation email here
-        alert(`Invitation would be sent to ${email} (not implemented in this demo).`);
+        console.log(`Invitation would be sent to ${email} (not implemented in this demo).`);
       }
       return;
     }
@@ -355,12 +395,11 @@ async function addUserByEmail(email) {
       inviteEmailInput.value = '';
     }
     
-    // Show success message
-    alert(`User ${user.name} (${user.email}) has been added to this account.`);
+    // Log success message
+    console.log(`User ${user.name} (${user.email}) has been added to this account.`);
     
   } catch (e) {
     console.error('Error adding user by email:', e);
-    alert('An error occurred while adding the user. Please try again.');
     
     // Reset button state
     if (addUserButton) {
@@ -385,12 +424,12 @@ async function saveAccount(formData) {
   
   if (!name) {
     console.log('Account name is empty or null');
-    alert('Please enter an account name.');
+    console.error('Please enter an account name.');
     return;
   }
   
   if (!type) {
-    alert('Please select an account type.');
+    console.error('Please select an account type.');
     return;
   }
   
@@ -399,7 +438,7 @@ async function saveAccount(formData) {
   console.log('Current user ID:', currentUserId);
   
   if (!currentUserId) {
-    alert('You must be logged in to save an account.');
+    console.error('You must be logged in to save an account.');
     return;
   }
   
@@ -441,7 +480,6 @@ async function saveAccount(formData) {
   
   if (error) {
     console.error('Error saving account:', error);
-    alert(`Error saving account: ${error.message}`);
     return;
   }
   
@@ -461,32 +499,65 @@ function editAccount(account) {
 function confirmDeleteAccount(account) {
   showConfirmation(
     'Delete Account',
-    `Are you sure you want to delete the account "${account.name}"? This will also delete all expenses associated with this account.`,
+    `Are you sure you want to delete the account "${account.name}"? Note: You must first remove or reassign all expenses associated with this account before it can be deleted.`,
     () => deleteAccount(account.id)
   );
 }
 
 // Delete account
-async function deleteAccount(id) {
-  const { error } = await window.supabase
-    .from('accounts')
-    .delete()
-    .eq('id', id);
-  
-  if (error) {
-    console.error('Error deleting account:', error);
-    alert(`Error deleting account: ${error.message}`);
-    return;
+async function deleteAccount(accountId) {
+  try {
+    // Get the expenses associated with this account first
+    const { data: accountExpenses } = await window.supabase
+      .from('expenses')
+      .select('id, name')
+      .eq('account_id', accountId);
+    
+    // If there are expenses, show a message and don't attempt to delete
+    if (accountExpenses && accountExpenses.length > 0) {
+      const expenseNames = accountExpenses.slice(0, 3).map(e => e.name).join(', ');
+      const additionalCount = accountExpenses.length > 3 ? ` and ${accountExpenses.length - 3} more` : '';
+      
+      showConfirmation(
+        'Cannot Delete Account',
+        `This account has ${accountExpenses.length} expense(s) linked to it (${expenseNames}${additionalCount}). Please remove or reassign all expenses associated with this account before deleting it.`,
+        null,
+        'OK'
+      );
+      return;
+    }
+    
+    // Delete account if no expenses are linked
+    const { error } = await window.supabase
+      .from('accounts')
+      .delete()
+      .eq('id', accountId);
+    
+    if (error) {
+      console.error('Error deleting account:', error);
+      
+      // Show a generic error message
+      showConfirmation(
+        'Error Deleting Account',
+        'There was an error deleting this account. Please try again later.',
+        null,
+        'OK'
+      );
+      return;
+    }
+    
+    // Reload accounts
+    await loadAccounts();
+    
+  } catch (err) {
+    console.error('Exception when deleting account:', err);
+    showConfirmation(
+      'Error Deleting Account',
+      'An unexpected error occurred. Please try again later.',
+      null,
+      'OK'
+    );
   }
-  
-  // Reload accounts
-  await loadAccounts();
-  
-  // Reload expenses (since they may reference this account)
-  await loadExpenses();
-  
-  // Update dashboard
-  updateDashboard();
 }
 
 // Get account by ID
@@ -524,8 +595,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const addUserButton = document.getElementById('add-user-button');
   if (addUserButton) {
     addUserButton.addEventListener('click', () => {
-      const email = document.getElementById('invite-email').value;
-      addUserByEmail(email);
+      addUserByEmail();
     });
   }
   

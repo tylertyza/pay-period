@@ -105,17 +105,17 @@ async function saveIncome(formData) {
   const rawFrequency = formData.get('income-frequency');
   
   if (!source) {
-    alert('Please enter an income source.');
+    console.error('Please enter an income source.');
     return;
   }
   
   if (isNaN(rawAmount) || rawAmount <= 0) {
-    alert('Please enter a valid amount.');
+    console.error('Please enter a valid amount.');
     return;
   }
   
   if (!rawFrequency) {
-    alert('Please enter a frequency.');
+    console.error('Please enter a frequency.');
     return;
   }
   
@@ -126,7 +126,7 @@ async function saveIncome(formData) {
   // Get current user ID
   const currentUserId = getCurrentUser()?.id;
   if (!currentUserId) {
-    alert('You must be logged in to save income.');
+    console.error('You must be logged in to save income.');
     return;
   }
   
@@ -162,7 +162,6 @@ async function saveIncome(formData) {
   
   if (error) {
     console.error('Error saving income:', error);
-    alert(`Error saving income: ${error.message}`);
     return;
   }
   
@@ -196,7 +195,6 @@ async function deleteIncome(incomeId) {
   
   if (error) {
     console.error('Error deleting income:', error);
-    alert(`Error deleting income: ${error.message}`);
     return;
   }
   

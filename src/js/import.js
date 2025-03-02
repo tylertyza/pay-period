@@ -3,14 +3,14 @@
 // Import data from CSV/Excel
 async function importData(file) {
   if (!file) {
-    alert('Please select a file to import.');
+    console.error('Please select a file to import.');
     return;
   }
   
   // Check file extension
   const fileExtension = file.name.split('.').pop().toLowerCase();
   if (fileExtension !== 'csv' && fileExtension !== 'xlsx' && fileExtension !== 'xls') {
-    alert('Please select a CSV or Excel file.');
+    console.error('Please select a CSV or Excel file.');
     return;
   }
   
@@ -26,12 +26,12 @@ async function importData(file) {
         data = parseCSV(e.target.result);
       } else {
         // For Excel files, we would need a library like SheetJS
-        alert('Excel import is not supported in this version. Please export to CSV first.');
+        console.error('Excel import is not supported in this version. Please export to CSV first.');
         return;
       }
       
       if (!data || data.length === 0) {
-        alert('No data found in the file.');
+        console.error('No data found in the file.');
         return;
       }
       
@@ -40,7 +40,7 @@ async function importData(file) {
       const missingColumns = requiredColumns.filter(col => !Object.keys(data[0]).includes(col));
       
       if (missingColumns.length > 0) {
-        alert(`Missing required columns: ${missingColumns.join(', ')}`);
+        console.error(`Missing required columns: ${missingColumns.join(', ')}`);
         return;
       }
       
@@ -49,12 +49,11 @@ async function importData(file) {
       
     } catch (error) {
       console.error('Error importing data:', error);
-      alert(`Error importing data: ${error.message}`);
     }
   };
   
   reader.onerror = () => {
-    alert('Error reading file.');
+    console.error('Error reading file.');
   };
   
   if (fileExtension === 'csv') {
@@ -69,7 +68,7 @@ async function importExpenses(data) {
   // Get current user ID
   const currentUserId = getCurrentUser()?.id;
   if (!currentUserId) {
-    alert('You must be logged in to import expenses.');
+    console.error('You must be logged in to import expenses.');
     return;
   }
   
@@ -159,8 +158,8 @@ async function importExpenses(data) {
     }
   }
   
-  // Show results
-  alert(`Import complete: ${imported} expenses imported, ${errors} errors.`);
+  // Show results in console
+  console.log(`Import complete: ${imported} expenses imported, ${errors} errors.`);
   
   // Reload expenses
   await loadExpenses();
@@ -169,7 +168,7 @@ async function importExpenses(data) {
 // Export expenses to CSV
 function exportExpenses() {
   if (!expenses || expenses.length === 0) {
-    alert('No expenses to export.');
+    console.error('No expenses to export.');
     return;
   }
   
@@ -196,7 +195,7 @@ function exportExpenses() {
 // Export income to CSV
 function exportIncome() {
   if (!incomes || incomes.length === 0) {
-    alert('No income to export.');
+    console.error('No income to export.');
     return;
   }
   
@@ -233,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (importFile.files.length > 0) {
         importData(importFile.files[0]);
       } else {
-        alert('Please select a file to import.');
+        console.error('Please select a file to import.');
       }
     });
   }
