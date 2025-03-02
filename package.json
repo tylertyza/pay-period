@@ -1,0 +1,28 @@
+{
+  "name": "pay-period-allocator",
+  "version": "1.0.0",
+  "description": "A web application for tracking recurring expenses and allocating funds per pay period",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build:css": "tailwindcss -i ./src/css/input.css -o ./public/css/styles.css",
+    "watch:css": "tailwindcss -i ./src/css/input.css -o ./public/css/styles.css --watch",
+    "dev": "node start.js"
+  },
+  "keywords": [
+    "expense",
+    "tracker",
+    "budget",
+    "finance"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.24",
+    "tailwindcss": "^3.3.2"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.26.0"
+  }
+} 

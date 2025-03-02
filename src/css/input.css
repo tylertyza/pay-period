@@ -1,0 +1,158 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply text-gray-900 dark:text-gray-300;
+  }
+  
+  body {
+    @apply bg-gray-50 dark:bg-dark-200 min-h-screen;
+  }
+  
+  /* Fix for dark mode text color */
+  .dark {
+    color-scheme: dark;
+  }
+  
+  .dark * {
+    --tw-text-opacity: 1 !important;
+    color: rgb(229 231 235 / var(--tw-text-opacity)) !important;
+  }
+  
+  /* Exceptions for specific elements that need different colors */
+  .dark .btn-primary,
+  .dark .text-primary-600,
+  .dark .text-green-500,
+  .dark .text-red-500,
+  .dark .accent-element,
+  .dark .tab-button.active,
+  .dark .btn-insert {
+    --tw-text-opacity: 1 !important;
+    color: inherit !important;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition-colors duration-200;
+  }
+  
+  .btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:outline-none dark:bg-dark-accent dark:hover:bg-primary-500 dark:focus:ring-dark-accent2;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-dark-300 dark:text-gray-200 dark:hover:bg-dark-400;
+  }
+  
+  /* Supabase-style insert button */
+  .btn-insert {
+    @apply flex items-center justify-center px-4 py-2 rounded-md font-medium transition-colors duration-200;
+    @apply bg-primary-600 text-white hover:bg-primary-700;
+    @apply dark:bg-dark-300 dark:text-white dark:border dark:border-dark-accent2 dark:hover:bg-dark-400;
+  }
+  
+  .card {
+    @apply bg-white dark:bg-dark-100 rounded-lg shadow-md p-6 dark:border dark:border-dark-400;
+  }
+  
+  .input {
+    @apply w-full px-3 py-2 border border-gray-300 dark:border-dark-400 rounded-md 
+           focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-dark-accent
+           bg-white dark:bg-dark-100 dark:text-white;
+  }
+  
+  .label {
+    @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
+  }
+  
+  .select {
+    @apply w-full px-3 py-2 border border-gray-300 dark:border-dark-400 rounded-md 
+           focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-dark-accent
+           bg-white dark:bg-dark-100 dark:text-white;
+  }
+
+  .tab-button.active {
+    @apply border-primary-500 text-primary-600 dark:border-dark-accent dark:text-dark-accent;
+  }
+  
+  /* Dark mode header and navigation */
+  .dark header {
+    @apply bg-dark-100 border-dark-300;
+  }
+  
+  .dark .tab-button {
+    @apply hover:text-dark-accent hover:border-dark-accent;
+  }
+  
+  /* Dark mode form elements focus states */
+  .dark .input:focus, 
+  .dark .select:focus {
+    @apply border-dark-accent;
+  }
+  
+  /* Main color (background elements) */
+  .dark .bg-white {
+    @apply bg-dark-200;
+  }
+  
+  /* Secondary color (cards, inputs, dropdowns) */
+  .dark .card,
+  .dark .input,
+  .dark .select,
+  .dark .dropdown-content {
+    @apply bg-dark-100 border-dark-400;
+  }
+  
+  /* Accent colors (buttons, links, highlights) */
+  .dark a:not(.btn),
+  .dark .link {
+    @apply text-dark-accent hover:text-primary-400;
+  }
+  
+  /* Table styling like Supabase */
+  .dark .table {
+    @apply border-collapse;
+  }
+  
+  .dark .table th {
+    @apply bg-dark-300 text-gray-400 font-medium py-2 px-4 text-left border-b border-dark-400;
+  }
+  
+  .dark .table td {
+    @apply py-2 px-4 border-b border-dark-400;
+  }
+  
+  .dark .table tr:hover {
+    @apply bg-dark-300;
+  }
+  
+  /* Sidebar styling like Supabase */
+  .dark .sidebar {
+    @apply bg-dark-100 border-r border-dark-400;
+  }
+  
+  .dark .sidebar-item {
+    @apply text-gray-400 hover:text-white hover:bg-dark-300 rounded-md;
+  }
+  
+  .dark .sidebar-item.active {
+    @apply bg-dark-300 text-white;
+  }
+  
+  /* Modal styling */
+  .dark .modal-content {
+    @apply bg-dark-100 border border-dark-400 shadow-xl;
+  }
+  
+  /* Special accent elements - use bright accent sparingly */
+  .dark .accent-border {
+    @apply border-dark-accent2;
+  }
+  
+  .dark .accent-highlight {
+    @apply text-dark-accent2;
+  }
+} 
