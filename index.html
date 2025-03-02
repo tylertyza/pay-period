@@ -526,8 +526,8 @@
         });
         
         // Initialize Supabase client after loading environment variables
-        const SUPABASE_URL = window.SUPABASE_URL || 'https://ebepnhoybbmyndhjflmo.supabase.co';
-        const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViZXBuaG95YmJteW5kaGpmbG1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA4NzI1NTAsImV4cCI6MjA1NjQ0ODU1MH0.eG65XcXv9LY9q9uQBBGsjeQUdWawwaGrR7ebXaO93u4';
+        const SUPABASE_URL = window.SUPABASE_URL || 'your-supabase-url';
+        const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'your-supabase-anon-key';
         window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
           auth: {
             persistSession: true,
@@ -537,9 +537,10 @@
       })
       .catch(error => {
         console.warn('Could not load .env file:', error);
-        // Initialize with actual values if .env fails to load
-        const SUPABASE_URL = 'https://ebepnhoybbmyndhjflmo.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViZXBuaG95YmJteW5kaGpmbG1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA4NzI1NTAsImV4cCI6MjA1NjQ0ODU1MH0.eG65XcXv9LY9q9uQBBGsjeQUdWawwaGrR7ebXaO93u4';
+        // Initialize with placeholder values if .env fails to load
+        // You must create a .env file with your actual Supabase credentials
+        const SUPABASE_URL = 'your-supabase-url';
+        const SUPABASE_ANON_KEY = 'your-supabase-anon-key';
         window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
           auth: {
             persistSession: true,

@@ -28,18 +28,31 @@ Pay Period Allocator replaces an Excel spreadsheet used to track recurring expen
 
 1. Clone this repository
 2. Create a Supabase project at [https://supabase.com](https://supabase.com)
-3. Copy your Supabase URL and anon key to the `.env` file
-4. Run the SQL scripts in the `database` directory to set up your database schema
-5. Install Node.js if you don't have it already
-6. Install TailwindCSS: `npm install -g tailwindcss`
-7. Build the CSS: `node build.js`
-8. Start the server: `node server.js`
-9. Open your browser and navigate to `http://localhost:3000`
+3. Copy the `.env.example` file to `.env` and update with your Supabase URL and anon key:
+   ```
+   cp .env.example .env
+   ```
+4. Edit the `.env` file with your actual Supabase credentials
+5. Run the SQL scripts in the `database` directory to set up your database schema
+6. Install Node.js if you don't have it already
+7. Install TailwindCSS: `npm install -g tailwindcss`
+8. Build the CSS: `node build.js`
+9. Start the server: `node server.js`
+10. Open your browser and navigate to `http://localhost:3000`
 
 Alternatively, you can use the start script to build the CSS and start the server in one command:
 ```
 node start.js
 ```
+
+## Environment Variables
+
+The application requires the following environment variables to be set in the `.env` file:
+
+- `SUPABASE_URL`: Your Supabase project URL
+- `SUPABASE_ANON_KEY`: Your Supabase anonymous key
+
+These credentials are used to connect to your Supabase project for authentication and database operations.
 
 ## Database Schema
 
