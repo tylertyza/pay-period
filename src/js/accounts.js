@@ -218,56 +218,156 @@ function removeSharedUser(userId) {
 
 // Find user by email
 async function findUserByEmail(email) {
-  const { data, error } = await window.supabase
-    .from('users')
-    .select('id, name, email')
-    .eq('email', email)
-    .single();
+  console.log('Searching for user with email:', email);
   
-  if (error) {
-    if (error.code === 'PGRST116') {
-      // No user found with this email
-      return null;
-    }
-    console.error('Error finding user by email:', error);
+  if (!email || !email.includes('@')) {
+    console.error('Invalid email format:', email);
     return null;
   }
   
-  return data;
+  try {
+    // Try to find the user using a more flexible approach
+    // First, try a direct match with exact email
+    const { data: exactMatch, error: exactError } = await window.supabase
+      .from('users')
+      .select('id, name, email')
+      .eq('email', email)
+      .limit(1);
+    
+    console.log('Exact match search results:', exactMatch, 'Error:', exactError);
+    
+    if (exactMatch && exactMatch.length > 0) {
+      console.log('User found with exact match:', exactMatch[0]);
+      return exactMatch[0];
+    }
+    
+    // If no exact match, try case-insensitive search
+    const { data: likeMatch, error: likeError } = await window.supabase
+      .from('users')
+      .select('id, name, email')
+      .ilike('email', email)
+      .limit(1);
+    
+    console.log('Case-insensitive search results:', likeMatch, 'Error:', likeError);
+    
+    if (likeMatch && likeMatch.length > 0) {
+      console.log('User found with case-insensitive match:', likeMatch[0]);
+      return likeMatch[0];
+    }
+    
+    // If still no match, try a function call that bypasses RLS
+    // Note: This would require a server-side function in a real app
+    // For this demo, we'll simulate it with a special endpoint
+    
+    // Try a different approach - search in auth.users if available
+    // This is a workaround and might not work in all environments
+    try {
+      const { data: authUsers, error: authError } = await window.supabase
+        .rpc('find_user_by_email', { email_to_find: email });
+      
+      console.log('RPC search results:', authUsers, 'Error:', authError);
+      
+      if (authUsers && authUsers.length > 0) {
+        return {
+          id: authUsers[0].id,
+          name: authUsers[0].name || 'User',
+          email: authUsers[0].email
+        };
+      }
+    } catch (rpcError) {
+      console.log('RPC method not available:', rpcError);
+      // Continue with other methods if RPC fails
+    }
+    
+    console.log('No user found with email:', email);
+    return null;
+  } catch (e) {
+    console.error('Exception during user search:', e);
+    return null;
+  }
 }
 
 // Add user to shared users
 async function addUserByEmail(email) {
+  console.log('Adding user by email:', email);
+  
   // Check if email is valid
   if (!email || !email.includes('@')) {
     alert('Please enter a valid email address.');
     return;
   }
   
+  // Normalize email for comparison
+  const normalizedEmail = email.toLowerCase().trim();
+  
   // Check if user already exists in shared users
-  const existingUser = sharedUsers.find(user => user.email === email);
+  const existingUser = sharedUsers.find(user => 
+    user.email.toLowerCase() === normalizedEmail
+  );
+  
   if (existingUser) {
     alert('This user is already shared on this account.');
     return;
   }
   
-  // Find user by email
-  const user = await findUserByEmail(email);
-  if (!user) {
-    // User not found, offer to send invitation
-    if (confirm(`No user found with email ${email}. Would you like to send an invitation?`)) {
-      // In a real app, you would send an invitation email here
-      alert(`Invitation would be sent to ${email} (not implemented in this demo).`);
-    }
-    return;
+  // Show loading state
+  const addUserButton = document.getElementById('add-user-button');
+  const inviteEmailInput = document.getElementById('invite-email');
+  
+  if (addUserButton) {
+    addUserButton.disabled = true;
+    addUserButton.textContent = 'Searching...';
   }
   
-  // Add user to shared users
-  sharedUsers.push(user);
-  renderSharedUsers();
-  
-  // Clear the input field
-  document.getElementById('invite-email').value = '';
+  try {
+    // Find user by email
+    const user = await findUserByEmail(normalizedEmail);
+    
+    // Reset button state
+    if (addUserButton) {
+      addUserButton.disabled = false;
+      addUserButton.textContent = 'Add';
+    }
+    
+    if (!user) {
+      // Try one more approach - check if the current user can add this email
+      // This is a special case for testing/demo purposes
+      const currentUser = getCurrentUser();
+      if (currentUser && currentUser.email === normalizedEmail) {
+        alert("You can't add yourself as a shared user because you're already the owner.");
+        return;
+      }
+      
+      // User not found, offer to send invitation
+      if (confirm(`No user found with email ${email}. This user needs to create an account before they can be added. Would you like to send them an invitation?`)) {
+        // In a real app, you would send an invitation email here
+        alert(`Invitation would be sent to ${email} (not implemented in this demo).`);
+      }
+      return;
+    }
+    
+    // Add user to shared users
+    sharedUsers.push(user);
+    renderSharedUsers();
+    
+    // Clear the input field
+    if (inviteEmailInput) {
+      inviteEmailInput.value = '';
+    }
+    
+    // Show success message
+    alert(`User ${user.name} (${user.email}) has been added to this account.`);
+    
+  } catch (e) {
+    console.error('Error adding user by email:', e);
+    alert('An error occurred while adding the user. Please try again.');
+    
+    // Reset button state
+    if (addUserButton) {
+      addUserButton.disabled = false;
+      addUserButton.textContent = 'Add';
+    }
+  }
 }
 
 // Save account
@@ -437,5 +537,79 @@ document.addEventListener('DOMContentLoaded', () => {
       const formData = new FormData(accountForm);
       await saveAccount(formData);
     });
+  }
+});
+
+// Debug function to help troubleshoot user search issues
+async function debugUserSearch(email) {
+  console.log('=== DEBUG: User Search ===');
+  console.log('Searching for email:', email);
+  
+  try {
+    // Check current user
+    const currentUser = getCurrentUser();
+    console.log('Current user:', currentUser ? {
+      id: currentUser.id,
+      email: currentUser.email,
+      name: currentUser.profile?.name
+    } : 'Not logged in');
+    
+    // Try exact match
+    console.log('Trying exact match...');
+    const { data: exactData, error: exactError } = await window.supabase
+      .from('users')
+      .select('*')
+      .eq('email', email);
+    
+    console.log('Exact match results:', exactData, 'Error:', exactError);
+    
+    // Try case-insensitive match
+    console.log('Trying case-insensitive match...');
+    const { data: likeData, error: likeError } = await window.supabase
+      .from('users')
+      .select('*')
+      .ilike('email', email);
+    
+    console.log('Case-insensitive results:', likeData, 'Error:', likeError);
+    
+    // Try RPC function if available
+    console.log('Trying RPC function...');
+    try {
+      const { data: rpcData, error: rpcError } = await window.supabase
+        .rpc('find_user_by_email', { email_to_find: email });
+      
+      console.log('RPC results:', rpcData, 'Error:', rpcError);
+    } catch (rpcError) {
+      console.log('RPC function not available:', rpcError);
+    }
+    
+    console.log('=== END DEBUG ===');
+  } catch (e) {
+    console.error('Error in debug function:', e);
+  }
+}
+
+// Add debug button to the account form
+document.addEventListener('DOMContentLoaded', () => {
+  const inviteEmailContainer = document.querySelector('#shared-users-container').parentNode;
+  
+  if (inviteEmailContainer) {
+    const debugButton = document.createElement('button');
+    debugButton.type = 'button';
+    debugButton.className = 'btn btn-secondary mt-2';
+    debugButton.textContent = 'Debug Search';
+    debugButton.style.fontSize = '0.75rem';
+    debugButton.style.padding = '0.25rem 0.5rem';
+    
+    debugButton.addEventListener('click', () => {
+      const email = document.getElementById('invite-email').value;
+      if (email) {
+        debugUserSearch(email);
+      } else {
+        alert('Please enter an email to debug');
+      }
+    });
+    
+    inviteEmailContainer.appendChild(debugButton);
   }
 }); 

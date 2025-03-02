@@ -75,10 +75,12 @@ ALTER TABLE public.expenses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.expense_splits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.income ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policies
--- Users can only see their own data
-CREATE POLICY "Users can view own data" ON public.users
-  FOR SELECT USING (auth.uid() = id);
+-- Drop the restrictive policy
+DROP POLICY IF EXISTS "Users can view own data" ON public.users;
+
+-- Create a more permissive policy for viewing users
+CREATE POLICY "Users can view all users for sharing" ON public.users
+  FOR SELECT USING (auth.role() = 'authenticated');
 
 -- Accounts policy - users can see accounts where they are an owner
 CREATE POLICY "Users can view own accounts" ON public.accounts
@@ -204,4 +206,13 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- Create trigger for new user creation
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user(); 
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- Create function to find users by email (bypasses RLS)
+CREATE OR REPLACE FUNCTION public.find_user_by_email(email_to_find TEXT)
+RETURNS SETOF public.users
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+  SELECT * FROM public.users WHERE email ILIKE email_to_find LIMIT 1;
+$$; 
