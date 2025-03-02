@@ -1,5 +1,6 @@
 -- Enable RLS (Row Level Security)
-ALTER DATABASE postgres SET "app.jwt_secret" TO 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViZXBuaG95YmJteW5kaGpmbG1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MDg3MjU1MCwiZXhwIjoyMDU2NDQ4NTUwfQ.SrjDyyADvY3kM_i3HrDhyyyUkToossuOKOANwSW__Ag';
+-- NOTE: Replace this with your actual JWT secret in your local development environment
+-- ALTER DATABASE postgres SET "app.jwt_secret" TO 'your-jwt-secret';
 
 -- Create users table (managed by Supabase Auth)
 -- Note: Supabase Auth already creates a 'auth.users' table
