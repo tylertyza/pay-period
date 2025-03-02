@@ -2,6 +2,14 @@
 
 A mobile-friendly web application for tracking recurring expenses and determining how much each person needs to set aside per pay period.
 
+## ⚠️ Security Notice
+
+**IMPORTANT**: If you've cloned this repository before July 2024, please be aware that it contained sensitive credentials in earlier commits. These credentials have been rotated and are no longer valid. However, as a security precaution:
+
+1. Always use the latest version of this repository
+2. Never commit sensitive credentials to Git repositories
+3. Always use environment variables for sensitive information
+
 ## Overview
 
 Pay Period Allocator replaces an Excel spreadsheet used to track recurring expenses and determine how much each person needs to set aside per pay period. The app allocates funds to specific bank accounts (e.g. "Spending", "Bills", "Joint Bills"), allows flexible frequency inputs, supports custom splitting ratios (defaulting to 50/50), and tracks income to calculate net remaining funds after expenses.
